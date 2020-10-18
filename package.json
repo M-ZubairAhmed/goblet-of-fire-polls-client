@@ -4,6 +4,7 @@
   "description": "Client/Public facing app for Goblet of Fire DApp ",
   "main": "index.js",
   "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server --config webpack.dev.config.js",
     "pretty": "./node_modules/.bin/prettier --write '**/*.{js,json,scss,html}'"
   },
   "repository": {
