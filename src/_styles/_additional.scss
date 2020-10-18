@@ -1,7 +1,6 @@
 html {
   @apply bg-gray-800;
   @apply subpixel-antialiased;
-  @apply text-gray-100;
   font-family: 'Sansita Swashed', cursive;
   @apply lining-nums;
 }
@@ -14,7 +13,7 @@ html {
     @apply h-auto;
     @apply relative;
     & .flame {
-      animation-name: flameWobble;
+      animation-name: wobble;
       animation-duration: 3s;
       animation-timing-function: linear;
       animation-iteration-count: infinite;
@@ -49,8 +48,24 @@ html {
   }
 }
 
-@keyframes flameWobble {
+@keyframes wobble {
   50% {
     transform: scale(1, 1.2) translate(0, -30px) rotate(-2deg);
+  }
+}
+
+// paper parchment css
+.parchment {
+  &::after {
+    content: '';
+    @apply w-full;
+    @apply h-1;
+    @apply absolute;
+    @apply left-0;
+    bottom: -0.25rem;
+    background: linear-gradient(135deg, #fefcbf 25%, transparent 25%) center top
+        repeat-x,
+      linear-gradient(045deg, transparent 75%, #fefcbf 75%) center top repeat-x;
+    background-size: 12px 8px;
   }
 }
