@@ -29,10 +29,30 @@ module.exports = {
     port: 8000,
     disableHostCheck: true,
   },
+  module: {
+    rules: [
+      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      {
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [require('tailwindcss')],
+              },
+            },
+          },
+          'sass-loader',
+        ],
+      },
+    ],
+  },
   plugins: [
     new htmlWebpackPlugin({
       template: path.resolve(__dirname, 'src', 'index.html'),
-      favicon: path.resolve(__dirname, 'src', 'favicon.ico'),
     }),
     new webpack.DefinePlugin({
       'process.env': JSON.stringify(environmentalVars.parsed),
