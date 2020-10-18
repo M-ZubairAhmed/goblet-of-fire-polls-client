@@ -1,6 +1,56 @@
 html {
-    @apply bg-gray-700;
-    @apply subpixel-antialiased;
-    font-family: 'Sansita Swashed', cursive;
-    @apply lining-nums;
+  @apply bg-gray-800;
+  @apply subpixel-antialiased;
+  @apply text-gray-100;
+  font-family: 'Sansita Swashed', cursive;
+  @apply lining-nums;
+}
+
+// goblet of fire css
+.goblet {
+  @apply w-56;
+  & .fire-svg {
+    @apply w-full;
+    @apply h-auto;
+    @apply relative;
+    & .flame {
+      animation-name: flameWobble;
+      animation-duration: 3s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      &-one {
+        animation-duration: 4s;
+        animation-delay: 1s;
+      }
+      &-two {
+        animation-duration: 3s;
+        animation-delay: 2s;
+      }
+      &-three {
+        animation-duration: 2.1s;
+        animation-delay: 3s;
+      }
+      &-four {
+        animation-duration: 3.2s;
+        animation-delay: 4s;
+      }
+      &-five {
+        animation-duration: 2.5s;
+        animation-delay: 5s;
+      }
+    }
   }
+  & .vase-svg {
+    width: 200%;
+    @apply h-auto;
+    @apply relative;
+    top: -120px;
+    left: -60px;
+  }
+}
+
+@keyframes flameWobble {
+  50% {
+    transform: scale(1, 1.2) translate(0, -30px) rotate(-2deg);
+  }
+}

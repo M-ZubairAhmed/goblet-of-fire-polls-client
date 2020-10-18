@@ -3,32 +3,20 @@ const path = require('path')
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const dotenv = require('dotenv')
 
-const environmentalVars = dotenv.config({
-  path: path.resolve(__dirname, '.env.dev'),
+const envVars = dotenv.config({
+  path: path.resolve(__dirname, '.env'),
 })
 
 module.exports = {
-  mode: 'DEVELOPMENT',
-  entry: path.resolve(__dirname, 'src', 'index.js'),
+  mode: 'development',
+  entry: path.resolve(__dirname, 'src', '_routes', 'index.js'),
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'dist-[hash].js',
-    publicPath: '/',
+    filename: 'dist.bundle-[hash].js',
     pathinfo: true,
-  },
-  resolve: {
-    modules: [path.resolve('src'), path.resolve('node_modules')],
+    publicPath: '/',
   },
   devtool: 'inline-source-map',
-  devServer: {
-    compress: false,
-    historyApiFallback: true,
-    host: 'localhost',
-    open: true,
-    stats: 'errors-only',
-    port: 8000,
-    disableHostCheck: true,
-  },
   module: {
     rules: [
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
@@ -50,12 +38,24 @@ module.exports = {
       },
     ],
   },
+  resolve: {
+    modules: [path.resolve('src'), path.resolve('node_modules')],
+  },
   plugins: [
     new htmlWebpackPlugin({
-      template: path.resolve(__dirname, 'src', 'index.html'),
+      template: path.resolve(__dirname, 'src', '_static', 'index.html'),
     }),
     new webpack.DefinePlugin({
-      'process.env': JSON.stringify(environmentalVars.parsed),
+      'process.env': JSON.stringify(envVars.parsed),
     }),
   ],
+  devServer: {
+    compress: false,
+    historyApiFallback: true,
+    host: 'localhost',
+    open: false,
+    stats: 'errors-only',
+    port: 8000,
+    disableHostCheck: true,
+  },
 }
