@@ -1,11 +1,32 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Web3 from 'web3'
+
 import { GobletSVG } from '_common/svgs'
 
+const NavBar = ({ isWalletConnected = false }) => (
+  <header className="text-center w-full flex flex-col">
+    <div className="flex flex-col bg-gray-700 py-4 px-4">
+      <h1 className="text-5xl tracking-widest text-white py-4">
+        Goblet Of Fire Polls 1994
+      </h1>
+      <nav className="text-right">
+        <div
+          className={`text-white font-bold py-2 px-4 
+          rounded-full transition duration-200 ease-linear font-sans`}>
+          <span
+            className={`w-3 h-3 rounded-full ${
+              isWalletConnected ? 'bg-green-400' : 'bg-gray-400'
+            } inline-block mr-3`}
+          />
+          {isWalletConnected ? 'Connected' : 'Disconnected'}
+        </div>
+      </nav>
+    </div>
+  </header>
+)
+
 const Info = () => (
-  <header className="text-center w-full">
-    <h1 className="text-5xl tracking-widest text-white py-4 bg-gray-700">
-      Goblet Of Fire Polls 1994
-    </h1>
+  <article>
     <h3 className="text-2xl text-center my-8 text-gray-400 font-thin w-4/6 mx-auto">
       Goblet of fire at 1994 Triwizard Tournament was bewitched, it could have
       been avoided if it was on BlockChain. Vote for the champion of the
@@ -14,8 +35,9 @@ const Info = () => (
     <h4 className="text-center text-4xl mb-6 text-gray-500 font-bold">
       Drag the parchment into the Goblet of Fire
     </h4>
-  </header>
+  </article>
 )
+
 const PaperParchment = ({
   candidateName,
   candidateSchool,
@@ -83,6 +105,9 @@ const Home = () => {
   const [isGobletFireInRed, setGobletFireToRed] = useState(false)
   const [parchmentInDrag, setParchmentInDrag] = useState(0)
 
+  const web3 = useRef()
+  const [isWalletConnected, setWalletConnectionTo] = useState(false)
+
   function onStartParchmentDrag(candidateID) {
     setParchmentInDrag(candidateID)
   }
@@ -108,6 +133,50 @@ const Home = () => {
     console.log('ok')
   }
 
+  async function activateWeb3() {
+    // modern browsers
+    if (window && window.ethereum) {
+      try {
+        // request for accound access prompt
+        await window.ethereum.enable()
+
+        const web3 = new Web3(window.ethereum)
+        return web3
+      } catch (err) {
+        // user denied account access
+        console.error('User denied connection', err)
+        return null
+      }
+    }
+
+    // legacy browsers
+    if (window && window.web3) {
+      const web3 = new Web3(web3.currentProvider)
+      return web3
+    }
+
+    // unsupported browsers
+    console.error('Unsupported browsers')
+    return null
+  }
+
+  async function loadEthereumWallet() {
+    const activatedWeb3 = await activateWeb3()
+
+    // if wallet connected
+    if (activatedWeb3 !== null) {
+      web3.current = activatedWeb3
+      setWalletConnectionTo(true)
+    } else {
+      // wallet not connected
+      setWalletConnectionTo(false)
+    }
+  }
+
+  useEffect(() => {
+    loadEthereumWallet()
+  }, [])
+
   const candidates = [
     {
       candidateID: '1',
@@ -128,6 +197,7 @@ const Home = () => {
 
   return (
     <main className="flex flex-col justify-center items-center">
+      <NavBar isWalletConnected={isWalletConnected} />
       <Info />
       <Parchments
         candidates={candidates}
