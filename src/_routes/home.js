@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Web3 from 'web3'
 
+import ElectionABI from '_abi/Election.json'
 import { GobletSVG } from '_common/svgs'
 
 const NavBar = ({ isWalletConnected = false }) => (
@@ -39,9 +40,11 @@ const Info = () => (
 )
 
 const PaperParchment = ({
+  candidateID,
   candidateName,
   candidateSchool,
-  candidateID,
+  candidateVotes,
+  showVotesCount,
   parchmentInDrag,
   onStartParchmentDrag,
   onEndParchmentDrag,
@@ -54,15 +57,17 @@ const PaperParchment = ({
   }`}
     draggable
     onDragStart={() => onStartParchmentDrag(candidateID)}
-    onDragEnd={onEndParchmentDrag}>
-    {candidateName}
-    <br />
+    onDragEnd={onEndParchmentDrag}
+    title={`Drag ${candidateName}'s name into the goblet of fire`}>
+    <h4>{candidateName}</h4>
     <p className="text-sm text-center">{candidateSchool}</p>
+    {showVotesCount && <h2 className="text-4xl">{candidateVotes}</h2>}
   </div>
 )
 
 const Parchments = ({
   candidates,
+  showVotesCount,
   parchmentInDrag,
   onStartParchmentDrag,
   onEndParchmentDrag,
@@ -71,10 +76,12 @@ const Parchments = ({
     <div className="flex flex-row items-center justify-around">
       {candidates.map(candidate => (
         <PaperParchment
-          key={candidate.candidateID}
-          candidateID={candidate.candidateID}
-          candidateName={candidate.candidateName}
-          candidateSchool={candidate.candidateSchool}
+          key={candidate.id}
+          candidateID={candidate.id}
+          candidateName={candidate.name}
+          candidateSchool={candidate.school}
+          candidateVotes={candidate.votes}
+          showVotesCount={showVotesCount}
           parchmentInDrag={parchmentInDrag}
           onStartParchmentDrag={onStartParchmentDrag}
           onEndParchmentDrag={onEndParchmentDrag}
@@ -85,28 +92,40 @@ const Parchments = ({
 }
 
 const GobletOfFire = ({
+  candidates = [],
   onParchmentEnterGoblet,
   onParchmentOverGoblet,
   onParchmentLeaveGoblet,
   onParchmentDropInGoblet,
   isGobletFireInRed,
-}) => (
-  <div
-    className="w-auto mt-6"
-    onDragEnter={onParchmentEnterGoblet}
-    onDragOver={onParchmentOverGoblet}
-    onDragLeave={onParchmentLeaveGoblet}
-    onDrop={onParchmentDropInGoblet}>
-    <GobletSVG isGobletFireInRed={isGobletFireInRed} />
-  </div>
-)
+}) => {
+  if (candidates.length === 0) {
+    return null
+  }
+
+  return (
+    <div
+      className="w-auto mt-6"
+      onDragEnter={onParchmentEnterGoblet}
+      onDragOver={onParchmentOverGoblet}
+      onDragLeave={onParchmentLeaveGoblet}
+      onDrop={onParchmentDropInGoblet}>
+      <GobletSVG isGobletFireInRed={isGobletFireInRed} />
+    </div>
+  )
+}
 
 const Home = () => {
   const [isGobletFireInRed, setGobletFireToRed] = useState(false)
   const [parchmentInDrag, setParchmentInDrag] = useState(0)
 
   const web3 = useRef()
+  const electionContract = useRef()
   const [isWalletConnected, setWalletConnectionTo] = useState(false)
+  const [userAccount, setUserAccount] = useState(null)
+
+  const [candidates, setCandidates] = useState([])
+  const [showVotesCount, setShowVotesTo] = useState(false)
 
   function onStartParchmentDrag(candidateID) {
     setParchmentInDrag(candidateID)
@@ -160,13 +179,68 @@ const Home = () => {
     return null
   }
 
-  async function loadEthereumWallet() {
+  async function getAllCandidates() {
+    const numberOfCandidates = await electionContract.current.methods
+      .numberOfCandidates()
+      .call()
+
+    if (numberOfCandidates !== 0) {
+      let candidates = []
+      for (
+        let candidateIndex = 1;
+        candidateIndex <= numberOfCandidates;
+        candidateIndex++
+      ) {
+        const candidateData = await electionContract.current.methods
+          .candidates(candidateIndex)
+          .call()
+
+        const candidate = {
+          id: candidateData.id,
+          name: candidateData.name,
+          school: candidateData.school,
+          votes: candidateData.votes,
+        }
+
+        candidates.push(candidate)
+      }
+
+      setCandidates(candidates)
+    } else {
+      console.error('No candidates')
+    }
+  }
+
+  async function getBlockChainInitData() {
+    const account = await web3.current.eth.getAccounts()
+
+    const userAccount = account[0]
+    setUserAccount(userAccount)
+
+    const networkID = await web3.current.eth.net.getId()
+    const networkData = ElectionABI.networks[networkID]
+    if (networkData) {
+      electionContract.current = new web3.current.eth.Contract(
+        ElectionABI.abi,
+        networkData.address,
+      )
+
+      await getAllCandidates()
+    } else {
+      // Contract not found in the network
+      console.error('Contract not found on the given network')
+    }
+  }
+
+  async function loadBlockChain() {
     const activatedWeb3 = await activateWeb3()
 
     // if wallet connected
     if (activatedWeb3 !== null) {
       web3.current = activatedWeb3
       setWalletConnectionTo(true)
+
+      await getBlockChainInitData()
     } else {
       // wallet not connected
       setWalletConnectionTo(false)
@@ -174,26 +248,8 @@ const Home = () => {
   }
 
   useEffect(() => {
-    loadEthereumWallet()
+    loadBlockChain()
   }, [])
-
-  const candidates = [
-    {
-      candidateID: '1',
-      candidateName: 'Cedric Diggory',
-      candidateSchool: 'Hogwarts School',
-    },
-    {
-      candidateID: '2',
-      candidateName: 'Fleur Delacour',
-      candidateSchool: 'Beauxbatons Academy of Magic',
-    },
-    {
-      candidateID: '3',
-      candidateName: 'Viktor Krum',
-      candidateSchool: 'Durmstrang Institute',
-    },
-  ]
 
   return (
     <main className="flex flex-col justify-center items-center">
@@ -201,11 +257,13 @@ const Home = () => {
       <Info />
       <Parchments
         candidates={candidates}
+        showVotesCount={showVotesCount}
         onStartParchmentDrag={onStartParchmentDrag}
         onEndParchmentDrag={onEndParchmentDrag}
         parchmentInDrag={parchmentInDrag}
       />
       <GobletOfFire
+        candidates={candidates}
         onParchmentEnterGoblet={onParchmentEnterGoblet}
         onParchmentOverGoblet={onParchmentOverGoblet}
         onParchmentLeaveGoblet={onParchmentLeaveGoblet}
