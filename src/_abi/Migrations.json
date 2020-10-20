@@ -57,14 +57,24 @@
   "ast": {
     "absolutePath": "/home/za/projects/zbx/goblet-of-fire-polls-contracts/src/Migrations.sol",
     "exportedSymbols": {
-      "Migrations": [91]
+      "Migrations": [
+        91
+      ]
     },
     "id": 92,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "id": 60,
-        "literals": ["solidity", ">=", "0.4", ".22", "<", "0.8", ".0"],
+        "literals": [
+          "solidity",
+          ">=",
+          "0.4",
+          ".22",
+          "<",
+          "0.8",
+          ".0"
+        ],
         "nodeType": "PragmaDirective",
         "src": "32:32:1"
       },
@@ -75,7 +85,9 @@
         "documentation": null,
         "fullyImplemented": true,
         "id": 91,
-        "linearizedBaseContracts": [91],
+        "linearizedBaseContracts": [
+          91
+        ],
         "name": "Migrations",
         "nodeType": "ContractDefinition",
         "nodes": [
@@ -264,7 +276,10 @@
                       "id": 68,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [109, 110],
+                      "overloadedDeclarations": [
+                        109,
+                        110
+                      ],
                       "referencedDeclaration": 110,
                       "src": "199:7:1",
                       "typeDescriptions": {
@@ -446,14 +461,24 @@
   "legacyAST": {
     "absolutePath": "/home/za/projects/zbx/goblet-of-fire-polls-contracts/src/Migrations.sol",
     "exportedSymbols": {
-      "Migrations": [91]
+      "Migrations": [
+        91
+      ]
     },
     "id": 92,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "id": 60,
-        "literals": ["solidity", ">=", "0.4", ".22", "<", "0.8", ".0"],
+        "literals": [
+          "solidity",
+          ">=",
+          "0.4",
+          ".22",
+          "<",
+          "0.8",
+          ".0"
+        ],
         "nodeType": "PragmaDirective",
         "src": "32:32:1"
       },
@@ -464,7 +489,9 @@
         "documentation": null,
         "fullyImplemented": true,
         "id": 91,
-        "linearizedBaseContracts": [91],
+        "linearizedBaseContracts": [
+          91
+        ],
         "name": "Migrations",
         "nodeType": "ContractDefinition",
         "nodes": [
@@ -653,7 +680,10 @@
                       "id": 68,
                       "name": "require",
                       "nodeType": "Identifier",
-                      "overloadedDeclarations": [109, 110],
+                      "overloadedDeclarations": [
+                        109,
+                        110
+                      ],
                       "referencedDeclaration": 110,
                       "src": "199:7:1",
                       "typeDescriptions": {
@@ -840,12 +870,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xfe37a0a6FA21642517f2876dc78b6D4675b5F026",
-      "transactionHash": "0x0f5a629f2c62a68e3b1af1c9dc1b7f0b4598049ca0a996bbef8655dc577a01f2"
+      "address": "0x853c241d767a2d87950b0AabE13F9cAE62cfc89b",
+      "transactionHash": "0x4664cbacdfcdf72720eb3c40acd7823ce14caf69f66f3b0ba6f119225555f15a"
     }
   },
   "schemaVersion": "3.3.1",
-  "updatedAt": "2020-10-19T21:19:25.662Z",
+  "updatedAt": "2020-10-20T19:18:35.180Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

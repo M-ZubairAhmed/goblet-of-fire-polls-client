@@ -125,7 +125,7 @@ const Home = () => {
   const [userAccount, setUserAccount] = useState(null)
 
   const [candidates, setCandidates] = useState([])
-  const [showVotesCount, setShowVotesTo] = useState(false)
+  const [showVotesCount, setShowVotesTo] = useState(true)
 
   function onStartParchmentDrag(candidateID) {
     setParchmentInDrag(candidateID)
