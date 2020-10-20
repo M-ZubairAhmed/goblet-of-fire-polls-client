@@ -26,15 +26,17 @@ const NavBar = ({ isWalletConnected = false }) => (
   </header>
 )
 
-const Info = () => (
+const Info = ({ showVotesCount }) => (
   <article>
     <h3 className="text-2xl text-center my-8 text-gray-400 font-thin w-4/6 mx-auto">
       Goblet of fire at 1994 Triwizard Tournament was bewitched, it could have
-      been avoided if it was on BlockChain. Vote for the champion of the
-      tournament.
+      been avoided if it was on BlockChain. Vote for your favorite champion of
+      the tournament.
     </h3>
     <h4 className="text-center text-4xl mb-6 text-gray-500 font-bold">
-      Drag the parchment into the Goblet of Fire
+      {showVotesCount
+        ? 'Thank you for voting!'
+        : 'Drag the parchment into the Goblet of Fire'}
     </h4>
   </article>
 )
@@ -51,11 +53,13 @@ const PaperParchment = ({
 }) => (
   <div
     className={`flex justify-center flex-col w-64 h-32 bg-yellow-200 text-gray-700 items-center 
-  text-2xl relative parchment font-bold cursor-move select-none mx-6 hover:bg-yellow-100
+  text-2xl relative parchment font-bold select-none mx-6 
   transition duration-200 ease-in-out ${
     parchmentInDrag === candidateID ? 'opacity-0' : ''
-  }`}
-    draggable
+  }
+  ${showVotesCount ? 'cursor-default' : 'cursor-move hover:bg-yellow-100'}
+  `}
+    draggable={showVotesCount ? false : true}
     onDragStart={() => onStartParchmentDrag(candidateID)}
     onDragEnd={onEndParchmentDrag}
     title={`Drag ${candidateName}'s name into the goblet of fire`}>
@@ -125,32 +129,7 @@ const Home = () => {
   const [userAccount, setUserAccount] = useState(null)
 
   const [candidates, setCandidates] = useState([])
-  const [showVotesCount, setShowVotesTo] = useState(true)
-
-  function onStartParchmentDrag(candidateID) {
-    setParchmentInDrag(candidateID)
-  }
-
-  function onEndParchmentDrag() {
-    setParchmentInDrag(0)
-  }
-
-  function onParchmentEnterGoblet() {
-    setGobletFireToRed(true)
-  }
-
-  function onParchmentOverGoblet(event) {
-    event.preventDefault()
-  }
-
-  function onParchmentLeaveGoblet() {
-    setGobletFireToRed(false)
-  }
-
-  function onParchmentDropInGoblet() {
-    setGobletFireToRed(false)
-    console.log('ok')
-  }
+  const [showVotesCount, setShowVotesTo] = useState(false)
 
   async function activateWeb3() {
     // modern browsers
@@ -211,6 +190,18 @@ const Home = () => {
     }
   }
 
+  async function getVotersStatus(userAccount) {
+    const didUserVotedAlready = await electionContract.current.methods
+      .voters(userAccount)
+      .call()
+
+    if (didUserVotedAlready) {
+      setShowVotesTo(true)
+    } else {
+      setShowVotesTo(false)
+    }
+  }
+
   async function getBlockChainInitData() {
     const account = await web3.current.eth.getAccounts()
 
@@ -225,6 +216,7 @@ const Home = () => {
         networkData.address,
       )
 
+      await getVotersStatus(userAccount)
       await getAllCandidates()
     } else {
       // Contract not found in the network
@@ -251,10 +243,45 @@ const Home = () => {
     loadBlockChain()
   }, [])
 
+  function onStartParchmentDrag(candidateID) {
+    setParchmentInDrag(candidateID)
+  }
+
+  function onEndParchmentDrag() {
+    setParchmentInDrag(0)
+  }
+
+  function onParchmentEnterGoblet() {
+    setGobletFireToRed(true)
+  }
+
+  function onParchmentOverGoblet(event) {
+    event.preventDefault()
+  }
+
+  function onParchmentLeaveGoblet() {
+    setGobletFireToRed(false)
+  }
+
+  async function onParchmentDropInGoblet() {
+    setGobletFireToRed(false)
+    console.log(parchmentInDrag)
+    if (electionContract && electionContract.current) {
+      electionContract.current.methods
+        .voteCandidate(parchmentInDrag)
+        .send({ from: userAccount })
+        .on('receipt', () => {
+          // completed voting
+          setShowVotesTo(true)
+          getAllCandidates()
+        })
+    }
+  }
+
   return (
     <main className="flex flex-col justify-center items-center">
       <NavBar isWalletConnected={isWalletConnected} />
-      <Info />
+      <Info showVotesCount={showVotesCount} />
       <Parchments
         candidates={candidates}
         showVotesCount={showVotesCount}
